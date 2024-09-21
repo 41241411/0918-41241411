@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布遊戲</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            /* 水平置中 */
+            align-items: center;
+            /* 垂直置中 */
+            height: 100vh;
+            /* 高度為視窗高度 */
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1200px;
+            position: absolute;
+            /* 使用絕對定位 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* 讓 container 水平和垂直居中 */
+        }
+
+
+        .history {
+            width: 20%;
+            /* 設定歷史記錄區域的寬度 */
+            padding: 20px;
+            border-right: 2px solid #ff0000;
+            /* 右側邊框 */
+            box-sizing: border-box;
+            /* 包括邊框和內邊距在內 */
+        }
+        .history1 {
+            width: 20%;
+            /* 設定歷史記錄區域的寬度 */
+            padding: 20px;
+            border-right: 2px solid #f8f8f8;
+            /* 右側邊框 */
+            box-sizing: border-box;
+            /* 包括邊框和內邊距在內 */
+        }
+
+
+        .game-area {
+            width: 100%;
+            /* 設定遊戲區域的寬度 */
+            display: flex;
+            flex-direction: column;
+            /* 垂直排列 */
+            align-items: center;
+            /* 中心對齊 */
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            /* 讓按鈕水平居中 */
+            gap: 20px;
+            /* 設定按鈕之間的間距 */
+            flex-wrap: wrap;
+            /* 允許按鈕在小螢幕上換行 */
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px 0;
+            /* 垂直方向的間距 */
+            transition: transform 0.3s, background-color 0.3s;
+            background-color: #45a049;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            /* 統一按鈕寬度，讓三顆按鈕大小一致 */
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background-color: #d6b939;
+            color: rgb(255, 0, 0);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .icon {
+            margin-right: 8px;
+            /* 圖示與文字之間的間距 */
+        }
+
+        #history {
+            margin-top: 20px;
+            font-size: 18px;
+            height: 300px;
+            /* 設定高度 */
+            overflow-y: auto;
+            /* 使得可以滾動 */
+        }
+        #history1 {
+            margin-top: 20px;
+            font-size: 18px;
+            height: 300px;
+            /* 設定高度 */
+            overflow-y: auto;
+            /* 使得可以滾動 */
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="winSound" src="win.mp3"></audio>
+    <audio id="loseSound" src="lose.mp3"></audio>
+    <audio id="drawSound" src="draw.mp3"></audio>
+
+
+    <div class="container">
+        <div class="history">
+            <h2>歷史記錄</h2>
+            <div id="history"></div>
+        </div>
+        <div class="game-area">
+            <h1>剪刀石頭布遊戲</h1>
+            <div class="button-container">
+                <button onclick="play('剪刀')">
+                    <i class="fas fa-cut icon"></i>剪刀
+                </button>
+                <button onclick="play('石頭')">
+                    <i class="fas fa-hand-rock icon"></i>石頭
+                </button>
+                <button onclick="play('布')">
+                    <i class="fas fa-hand-paper icon"></i>布
+                </button>
+            </div>
+            <div id="result"></div>
+        </div>
+        <div class="history1"></div>
+            <div id="history1"></div>
+        </div>
+    </div>
+
+    <script>
+        let historyRecords = [];
+        let userWins = 0;
+        let computerWins = 0;
+
+        function play(userChoice) {
+            const choices = ['剪刀', '石頭', '布'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            let result = '';
+            let resultColor = '';
+            let soundToPlay = '';
+
+            if (userChoice === computerChoice) {
+                result = '平局！';
+                resultColor = 'orange';
+                soundToPlay = 'drawSound'; // 平局音效
+            } else if (
+                (userChoice === '剪刀' && computerChoice === '布') ||
+                (userChoice === '石頭' && computerChoice === '剪刀') ||
+                (userChoice === '布' && computerChoice === '石頭')
+            ) {
+                result = '你贏了！';
+                resultColor = 'green';
+                soundToPlay = 'winSound'; // 勝利音效
+                userWins++;
+            } else {
+                result = '你輸了！';
+                resultColor = 'red';
+                soundToPlay = 'loseSound'; // 輸的音效
+                computerWins++;
+            }
+
+            // 播放相應的音效
+            document.getElementById(soundToPlay).play();
+
+            // 更新結果顯示
+            document.getElementById('result').innerHTML = `你選擇了: ${userChoice}<br>電腦選擇了: ${computerChoice}<br>`;
+            const resultElement = document.createElement('span');
+            resultElement.style.color = resultColor;
+            resultElement.textContent = result;
+            document.getElementById('result').appendChild(resultElement);
+
+            // 更新歷史記錄
+            const record = `你: ${userChoice}, 電腦: ${computerChoice}, 結果: ${result}`;
+            historyRecords.push(record);
+            updateHistory();
+
+            // 檢查是否有勝利者
+            checkWinner();
+        }
+
+        function updateHistory() {
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = historyRecords
+                .map((record, index) => `${index + 1}. ${record}`)
+                .join('<br>');
+        }
+
+        function checkWinner() {
+            let finalResult;
+
+            if (userWins === 2) {
+                finalResult = '恭喜你！你贏了遊戲！';
+            } else if (computerWins === 2) {
+                finalResult = '很遺憾，電腦贏了遊戲！';
+            }
+
+            if (finalResult) {
+                historyRecords.push(finalResult); // 添加最後結果到歷史記錄
+                updateHistory(); // 更新歷史記錄顯示
+
+                // 使用 SweetAlert2 顯示彈出窗口
+                Swal.fire({
+                    title: finalResult,
+                    text: '點擊“再來一次”來刷新遊戲。',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: '再來一次',
+                    cancelButtonText: '取消',
+                    position: 'center',  // 確保彈窗在畫面中央，且不影響其他元素布局
+                    backdrop: true,      // 預設的背景遮罩，讓視窗顯示更清楚
+                    allowOutsideClick: false,  // 防止點擊外部關閉彈窗
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload(); // 刷新網頁
+                    } else {
+                        resetGame(); // 重置遊戲
+                    }
+                });
+            }
+        }
+
+        function resetGame() {
+            userWins = 0;
+            computerWins = 0;
+            historyRecords = [];
+            updateHistory();
+            document.getElementById('result').innerHTML = ''; // 清除結果顯示
+        }
+
+    </script>
+</body>
+
+</html>
